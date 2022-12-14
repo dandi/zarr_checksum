@@ -6,7 +6,11 @@ authors = ["Kitware, Inc. <kitware@kitware.com>"]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.8.10"
+boto3 = "^1.26.29"
+boto3-stubs = {extras = ["s3"], version = "^1.26.29"}
+dandischema = "^0.7.1"
+zarr = "^2.13.3"
 
 [tool.poetry.dev-dependencies]
 black = "^22.12.0"
