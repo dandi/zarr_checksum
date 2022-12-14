@@ -25,8 +25,8 @@ def local(directory: pathlib.Path):
 
 
 @cli.command()
-@click.argument("zarr_id")
-def remote(zarr_id: str):
-    checksum = S3ZarrChecksumCalculator().compute(zarr_id=zarr_id)
-    click.echo(click.style(text=f"Checksum for {zarr_id} complete:", fg="green"))
+@click.argument("url")
+def remote(url: str):
+    checksum = S3ZarrChecksumCalculator().compute(s3_url=url)
+    click.echo(click.style(text=f"Checksum for {url} complete:", fg="green"))
     click.echo(f"\n{checksum}")

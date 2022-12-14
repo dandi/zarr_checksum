@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from abc import ABC
 from pathlib import Path
 from typing import TypedDict
+from urllib.parse import urlparse
 
 import boto3
 from dandischema.digests.zarr import ZarrChecksum
@@ -24,6 +26,7 @@ __all__ = [
 class AWSCredentials(TypedDict):
     key: str
     secret: str
+    region: str
 
 
 class ZarrChecksumCalculator(ABC):
@@ -36,25 +39,36 @@ class S3ZarrChecksumCalculator(ZarrChecksumCalculator):
         return {
             "key": None,
             "secret": None,
+            "region": "us-east-1",
         }
 
     def __init__(self, credentials: AWSCredentials | None = None) -> None:
         self.credentials: AWSCredentials = credentials or self._default_credentials()
 
-    def yield_files(self, zarr_id: str) -> list[ObjectTypeDef]:
+    def yield_files(self, bucket: str, prefix: str = "") -> list[ObjectTypeDef]:
         """Get all objects in the zarr."""
         client = boto3.client(
             "s3",
-            region_name="us-east-1",
+            region_name=self.credentials["region"],
             aws_access_key_id=self.credentials["key"],
             aws_secret_access_key=self.credentials["secret"],
         )
 
-        # Set up zarr root path, to use as prefix and path
-        zarr_root = Path("zarr") / zarr_id
-
         continuation_token = None
-        options = {"Bucket": "dandiarchive", "Prefix": str(zarr_root)}
+        options = {"Bucket": bucket, "Prefix": prefix}
+
+        # Test that url is fully qualified path by appending slash to prefix and listing objects
+        test_resp = client.list_objects_v2(
+            Bucket=bucket, Prefix=os.path.join(prefix, "")
+        )
+        if "Contents" not in test_resp:
+            print(f"Warning: No files found under prefix: {prefix}.")
+            print(
+                "Please check that you have provided the fully qualified path to the zarr root."
+            )
+            return []
+
+        # Iterate until all files found
         while True:
             if continuation_token is not None:
                 options["ContinuationToken"] = continuation_token
@@ -66,7 +80,7 @@ class S3ZarrChecksumCalculator(ZarrChecksumCalculator):
             mapped = (
                 {
                     **obj,
-                    "Key": Path(obj["Key"]).relative_to(zarr_root),
+                    "Key": Path(obj["Key"]).relative_to(prefix),
                 }
                 for obj in res.get("Contents", [])
             )
@@ -79,11 +93,18 @@ class S3ZarrChecksumCalculator(ZarrChecksumCalculator):
             if continuation_token is None:
                 break
 
-    def compute(self, zarr_id: str) -> str:
+    def compute(self, s3_url: str) -> str:
         queue = ZarrChecksumModificationQueue()
 
+        # Parse url
+        parsed = urlparse(s3_url)
+        bucket = parsed.netloc
+        prefix = parsed.path.lstrip("/")
+        if not (parsed.scheme == "s3" and bucket):
+            raise Exception(f"Invalid S3 URL: {s3_url}")
+
         print("Retrieving files...")
-        for file in self.yield_files(zarr_id=zarr_id):
+        for file in self.yield_files(bucket=bucket, prefix=prefix):
             path = Path(file["Key"])
             queue.queue_file_update(
                 key=path.parent,
