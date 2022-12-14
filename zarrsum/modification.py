@@ -10,6 +10,8 @@ from dandischema.digests.zarr import (
     ZarrJSONChecksumSerializer,
 )
 
+__all__ = ["ZarrChecksumModification", "ZarrChecksumModificationQueue"]
+
 
 @dataclass
 class ZarrChecksumModification:
@@ -78,7 +80,7 @@ class ZarrChecksumModificationQueue:
         while not self.empty:
             # Pop the deepest directory available
             modification = self.pop_deepest()
-            print(f"Processing {modification.path}")
+            # print(f"Processing {modification.path}")
 
             # Generates a sorted checksum listing for the current path
             checksum_listing = ZarrJSONChecksumSerializer().generate_listing(

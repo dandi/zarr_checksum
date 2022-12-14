@@ -1,10 +1,6 @@
-"""Zarr checksumming code."""
-
 from __future__ import annotations
 
 import hashlib
-import os
-import sys
 from abc import ABC
 from pathlib import Path
 from typing import TypedDict
@@ -12,9 +8,17 @@ from typing import TypedDict
 import boto3
 from dandischema.digests.zarr import ZarrChecksum
 from mypy_boto3_s3.type_defs import ObjectTypeDef
+from tqdm import tqdm
 from zarr.storage import NestedDirectoryStore
 
-from zarr_checksum.modification import ZarrChecksumModificationQueue
+from zarrsum.modification import ZarrChecksumModificationQueue
+
+__all__ = [
+    "AWSCredentials",
+    "ZarrChecksumCalculator",
+    "S3ZarrChecksumCalculator",
+    "LocalZarrChecksumCalculator",
+]
 
 
 class AWSCredentials(TypedDict):
@@ -77,6 +81,8 @@ class S3ZarrChecksumCalculator(ZarrChecksumCalculator):
 
     def compute(self, zarr_id: str) -> str:
         queue = ZarrChecksumModificationQueue()
+
+        print("Retrieving files...")
         for file in self.yield_files(zarr_id=zarr_id):
             path = Path(file["Key"])
             queue.queue_file_update(
@@ -97,10 +103,12 @@ class LocalZarrChecksumCalculator(ZarrChecksumCalculator):
         if not root_path.exists():
             raise Exception("Path does not exist")
 
+        print("Discovering files...")
+
         # Initialize queue, iterate over each file in local zarr
         queue = ZarrChecksumModificationQueue()
         store = NestedDirectoryStore(root_path)
-        for file in store.keys():
+        for file in tqdm(list(store.keys())):
             # Construct full path, relative to root
             path = root_path / file
 
@@ -122,19 +130,3 @@ class LocalZarrChecksumCalculator(ZarrChecksumCalculator):
 
         # Process queue
         return queue.process()
-
-
-if __name__ == "__main__":
-    directory = os.getcwd()
-    if len(sys.argv) > 1:
-        directory = sys.argv[1]
-
-    # LocalZarrChecksumCalculator().compute(directory)
-    S3ZarrChecksumCalculator().compute(directory)
-    # compute_remote(
-    #     sys.argv[1],
-    #     credentials={
-    #         "key": os.getenv("AWS_ACCESS_KEY_ID", None),
-    #         "secret": os.getenv("AWS_SECRET_ACCESS_KEY", None),
-    #     },
-    # )
