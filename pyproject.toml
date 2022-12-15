@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "zarrsum"
+name = "zarr-checksum"
 version = "0.1.0"
 description = "Checksum support for zarrs stored in various backends"
 authors = ["Kitware, Inc. <kitware@kitware.com>"]
