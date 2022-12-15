@@ -71,8 +71,8 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.26.29"
-description = "Type annotations for boto3 1.26.29 generated with mypy-boto3-builder 7.12.0"
+version = "1.26.30"
+description = "Type annotations for boto3 1.26.30 generated with mypy-boto3-builder 7.12.0"
 category = "main"
 optional = false
 python-versions = ">=3.7"
@@ -118,7 +118,7 @@ backup-gateway = ["mypy-boto3-backup-gateway (>=1.26.0,<1.27.0)"]
 backupstorage = ["mypy-boto3-backupstorage (>=1.26.0,<1.27.0)"]
 batch = ["mypy-boto3-batch (>=1.26.0,<1.27.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.26.0,<1.27.0)"]
-boto3 = ["boto3 (==1.26.29)", "botocore (==1.29.29)"]
+boto3 = ["boto3 (==1.26.30)", "botocore (==1.29.30)"]
 braket = ["mypy-boto3-braket (>=1.26.0,<1.27.0)"]
 budgets = ["mypy-boto3-budgets (>=1.26.0,<1.27.0)"]
 ce = ["mypy-boto3-ce (>=1.26.0,<1.27.0)"]
@@ -967,7 +967,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.10"
-content-hash = "785119418e313ba4a72191053f267b73b7ac53a69c679ec2a088ca8e1e6466b0"
+content-hash = "ac032d90f55b1b28a9881281c42659c8faee7f73c13e7eeb57e03458687457c2"
 
 [metadata.files]
 arrow = []

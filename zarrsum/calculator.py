@@ -8,12 +8,11 @@ from typing import TypedDict
 from urllib.parse import urlparse
 
 import boto3
-from dandischema.digests.zarr import ZarrChecksum
 from mypy_boto3_s3.type_defs import ObjectTypeDef
 from tqdm import tqdm
 from zarr.storage import NestedDirectoryStore
 
-from zarrsum.modification import ZarrChecksumModificationQueue
+from zarrsum.modification import ZarrChecksumTree
 
 __all__ = [
     "AWSCredentials",
@@ -94,7 +93,7 @@ class S3ZarrChecksumCalculator(ZarrChecksumCalculator):
                 break
 
     def compute(self, s3_url: str) -> str:
-        queue = ZarrChecksumModificationQueue()
+        tree = ZarrChecksumTree()
 
         # Parse url
         parsed = urlparse(s3_url)
@@ -106,16 +105,14 @@ class S3ZarrChecksumCalculator(ZarrChecksumCalculator):
         print("Retrieving files...")
         for file in self.yield_files(bucket=bucket, prefix=prefix):
             path = Path(file["Key"])
-            queue.queue_file_update(
-                key=path.parent,
-                checksum=ZarrChecksum(
-                    name=path.name,
-                    size=file["Size"],
-                    digest=file["ETag"].strip('"'),
-                ),
+            tree.add_leaf(
+                path=path,
+                size=file["Size"],
+                digest=file["ETag"].strip('"'),
             )
 
-        return queue.process()
+        # Compute digest
+        return tree.process()
 
 
 class LocalZarrChecksumCalculator(ZarrChecksumCalculator):
@@ -126,28 +123,26 @@ class LocalZarrChecksumCalculator(ZarrChecksumCalculator):
 
         print("Discovering files...")
 
-        # Initialize queue, iterate over each file in local zarr
-        queue = ZarrChecksumModificationQueue()
+        # Initialize tree, iterate over each file in local zarr
+        tree = ZarrChecksumTree()
         store = NestedDirectoryStore(root_path)
         for file in tqdm(list(store.keys())):
-            # Construct full path, relative to root
-            path = root_path / file
+            path = Path(file)
+            absolute_path = root_path / path
+            size = absolute_path.stat().st_size
 
             # Compute md5sum of file
             md5sum = hashlib.md5()
-            with open(path, "rb") as f:
+            with open(absolute_path, "rb") as f:
                 while chunk := f.read(8192):
                     md5sum.update(chunk)
 
-            # Add file to queue
-            queue.queue_file_update(
-                key=path.parent.relative_to(root_path),
-                checksum=ZarrChecksum(
-                    name=path.name,
-                    size=path.stat().st_size,
-                    digest=md5sum.hexdigest(),
-                ),
+            # Add file to tree
+            tree.add_leaf(
+                path=path,
+                size=size,
+                digest=md5sum.hexdigest(),
             )
 
-        # Process queue
-        return queue.process()
+        # Compute digest
+        return tree.process()

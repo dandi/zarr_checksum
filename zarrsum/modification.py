@@ -1,60 +1,46 @@
 from __future__ import annotations
 
 import heapq
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
-from dandischema.digests.zarr import (
-    EMPTY_CHECKSUM,
-    ZarrChecksum,
-    ZarrJSONChecksumSerializer,
-)
+from zarrsum.models import ZarrChecksum, ZarrChecksums
 
-__all__ = ["ZarrChecksumModification", "ZarrChecksumModificationQueue"]
+__all__ = ["ZarrChecksumNode", "ZarrChecksumTree"]
 
 
+# Pydantic models aren't used for performance reasons
 @dataclass
-class ZarrChecksumModification:
-    """
-    A set of changes to apply to a ZarrChecksumListing.
-
-    Additions or modifications are stored in files_to_update and directories_to_update.
-    """
+class ZarrChecksumNode:
+    """Represents the aggregation of zarr files at a specific path in the tree."""
 
     path: Path
-    files_to_update: list[ZarrChecksum] = field(default_factory=list)
-    directories_to_update: list[ZarrChecksum] = field(default_factory=list)
+    checksums: ZarrChecksums
 
     def __lt__(self, other):
         return str(self.path) < str(other.path)
 
 
-class ZarrChecksumModificationQueue:
-    """
-    A queue of modifications to be applied to a zarr archive.
-
-    It is important to apply modifications starting as deep as possible, because every modification
-    changes the checksum of its parent, which bubbles all the way up to the top of the tree hash.
-    This class makes managing that queue of modifications much easier.
-    """
+class ZarrChecksumTree:
+    """A tree that represents the checksummed files in a zarr."""
 
     def __init__(self) -> None:
-        self._heap: list[tuple[int, ZarrChecksumModification]] = []
-        self._path_map: dict[Path, ZarrChecksumModification] = {}
+        self._heap: list[tuple[int, ZarrChecksumNode]] = []
+        self._path_map: dict[Path, ZarrChecksumNode] = {}
 
     @property
     def empty(self):
         return len(self._heap) == 0
 
     def _add_path(self, key: Path):
-        modification = ZarrChecksumModification(path=key)
+        node = ZarrChecksumNode(path=key, checksums=ZarrChecksums())
 
-        # Add link to modification
-        self._path_map[key] = modification
+        # Add link to node
+        self._path_map[key] = node
 
-        # Add modification to heap with length (negated to representa max heap)
+        # Add node to heap with length (negated to representa max heap)
         length = len(key.parents)
-        heapq.heappush(self._heap, (-1 * length, modification))
+        heapq.heappush(self._heap, (-1 * length, node))
 
     def _get_path(self, key: Path):
         if key not in self._path_map:
@@ -62,45 +48,50 @@ class ZarrChecksumModificationQueue:
 
         return self._path_map[key]
 
-    def queue_file_update(self, key: Path, checksum: ZarrChecksum):
-        self._get_path(key).files_to_update.append(checksum)
+    def add_leaf(self, path: Path, size: int, digest: str):
+        """Add a leaf file to the tree."""
+        parent_node = self._get_path(path.parent)
+        parent_node.checksums.files.append(
+            ZarrChecksum(name=path.name, size=size, digest=digest)
+        )
 
-    def queue_directory_update(self, key: Path, checksum: ZarrChecksum):
-        self._get_path(key).directories_to_update.append(checksum)
+    def add_node(self, path: Path, size: int, digest: str):
+        """Add an internal node to the tree."""
+        parent_node = self._get_path(path.parent)
+        parent_node.checksums.directories.append(
+            ZarrChecksum(
+                name=path.name,
+                size=size,
+                digest=digest,
+            )
+        )
 
-    def pop_deepest(self) -> ZarrChecksumModification:
-        """Find the deepest path in the queue, and return it and its children to be updated."""
-        _, modification = heapq.heappop(self._heap)
-        del self._path_map[modification.path]
+    def pop_deepest(self) -> ZarrChecksumNode:
+        """Find the deepest node in the tree, and return it."""
+        _, node = heapq.heappop(self._heap)
+        del self._path_map[node.path]
 
-        return modification
+        return node
 
-    def process(self):
-        """Process the queue, returning the resulting top level digest."""
+    def process(self) -> str:
+        """Process the tree, returning the resulting top level digest."""
+        # Begin with empty root node, so if no files are present, the empty checksum is returned
+        node = ZarrChecksumNode(path=".", checksums=ZarrChecksums())
         while not self.empty:
             # Pop the deepest directory available
-            modification = self.pop_deepest()
-            # print(f"Processing {modification.path}")
-
-            # Generates a sorted checksum listing for the current path
-            checksum_listing = ZarrJSONChecksumSerializer().generate_listing(
-                files=modification.files_to_update,
-                directories=modification.directories_to_update,
-            )
-            latest_checksum = checksum_listing
+            node = self.pop_deepest()
 
             # If we have reached the root node, then we're done.
-            if modification.path == Path(".") or modification.path == Path("/"):
-                return latest_checksum.digest
+            if node.path == Path(".") or node.path == Path("/"):
+                break
 
-            # The parent needs to incorporate the checksum modification we just made.
-            self.queue_directory_update(
-                modification.path.parent,
-                ZarrChecksum(
-                    name=modification.path.name,
-                    digest=checksum_listing.digest,
-                    size=checksum_listing.size,
-                ),
+            # Add the parent of this node to the tree
+            directory_digest = node.checksums.generate_digest()
+            self.add_node(
+                path=node.path,
+                size=directory_digest.size,
+                digest=directory_digest.digest,
             )
 
-        return EMPTY_CHECKSUM
+        # Return digest
+        return node.checksums.generate_digest().digest
