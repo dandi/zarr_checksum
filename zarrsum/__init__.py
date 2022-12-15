@@ -1,2 +1,2 @@
 import zarrsum.calculator  # noqa: F401
-import zarrsum.modification  # noqa: F401
+import zarrsum.tree  # noqa: F401

@@ -12,7 +12,7 @@ from mypy_boto3_s3.type_defs import ObjectTypeDef
 from tqdm import tqdm
 from zarr.storage import NestedDirectoryStore
 
-from zarrsum.modification import ZarrChecksumTree
+from zarrsum.tree import ZarrChecksumTree
 
 __all__ = [
     "AWSCredentials",
