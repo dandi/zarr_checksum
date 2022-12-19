@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import heapq
 from pathlib import Path
 
-from zarr_checksum.models import ZarrChecksum, ZarrChecksumManifest
+from zarr_checksum.checksum import ZarrChecksum, ZarrChecksumManifest
 
 __all__ = ["ZarrChecksumNode", "ZarrChecksumTree"]
 
