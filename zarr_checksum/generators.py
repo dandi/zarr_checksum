@@ -12,13 +12,23 @@ from zarr.storage import NestedDirectoryStore
 
 
 @dataclass
-class ChecksummedFile:
+class ZarrArchiveFile:
+    """
+    A file path, size, and md5 checksum, ready to be added to a ZarrChecksumTree.
+
+    This class differs from the `ZarrChecksum` class, for the following reasons:
+    * Field order does not matter
+    * This class is not serialized in any manner
+    * The `path` field is relative to the root of the zarr archive, while the `name` field of
+    `ZarrChecksum` is just the final component of said path
+    """
+
     path: Path
     size: int
     digest: str
 
 
-FileGenerator = Iterable[ChecksummedFile]
+FileGenerator = Iterable[ZarrArchiveFile]
 
 
 class AWSCredentials(TypedDict):
@@ -69,7 +79,7 @@ def yield_files_s3(
 
         # Fix keys of listing to be relative to zarr root
         mapped = (
-            ChecksummedFile(
+            ZarrArchiveFile(
                 path=Path(obj["Key"]).relative_to(prefix),
                 size=obj["Size"],
                 digest=obj["ETag"].strip('"'),
@@ -106,4 +116,4 @@ def yield_files_local(directory: str | Path) -> FileGenerator:
         digest = md5sum.hexdigest()
 
         # Yield file
-        yield ChecksummedFile(path=path, size=size, digest=digest)
+        yield ZarrArchiveFile(path=path, size=size, digest=digest)

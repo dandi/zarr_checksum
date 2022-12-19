@@ -45,6 +45,8 @@ class ZarrChecksum(pydantic.BaseModel):
     Every file and directory in a zarr archive has a name, digest, and size.
     Leaf nodes are created by providing an md5 digest.
     Internal nodes (directories) have a digest field that is a zarr directory digest
+
+    This class is serialized to JSON, and as such, key order should not be modified.
     """
 
     digest: str
