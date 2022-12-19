@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import heapq
 from dataclasses import dataclass
+import heapq
 from pathlib import Path
 
-from zarrsum.models import ZarrChecksum, ZarrChecksums
+from zarr_checksum.models import ZarrChecksum, ZarrChecksums
 
 __all__ = ["ZarrChecksumNode", "ZarrChecksumTree"]
 

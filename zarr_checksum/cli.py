@@ -2,7 +2,10 @@ import pathlib
 
 import click
 
-from zarrsum.calculator import LocalZarrChecksumCalculator, S3ZarrChecksumCalculator
+from zarr_checksum.calculator import (
+    LocalZarrChecksumCalculator,
+    S3ZarrChecksumCalculator,
+)
 
 
 @click.group()

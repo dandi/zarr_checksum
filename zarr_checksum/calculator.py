@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from abc import ABC
 import hashlib
 import os
-from abc import ABC
 from pathlib import Path
 from typing import TypedDict
 from urllib.parse import urlparse
@@ -12,7 +12,7 @@ from mypy_boto3_s3.type_defs import ObjectTypeDef
 from tqdm import tqdm
 from zarr.storage import NestedDirectoryStore
 
-from zarrsum.tree import ZarrChecksumTree
+from zarr_checksum.tree import ZarrChecksumTree
 
 __all__ = [
     "AWSCredentials",
