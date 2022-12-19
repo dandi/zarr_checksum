@@ -10,23 +10,6 @@ import boto3
 from tqdm import tqdm
 from zarr.storage import NestedDirectoryStore
 
-from zarr_checksum.tree import ZarrChecksumTree
-
-__all__ = [
-    "AWSCredentials",
-    "ChecksummedFile",
-    "FileGenerator",
-    "yield_files_s3",
-    "yield_files_local",
-    "compute_zarr_checksum",
-]
-
-
-class AWSCredentials(TypedDict):
-    key: str
-    secret: str
-    region: str
-
 
 @dataclass
 class ChecksummedFile:
@@ -36,6 +19,12 @@ class ChecksummedFile:
 
 
 FileGenerator = Iterable[ChecksummedFile]
+
+
+class AWSCredentials(TypedDict):
+    key: str
+    secret: str
+    region: str
 
 
 def yield_files_s3(
@@ -118,16 +107,3 @@ def yield_files_local(directory: str | Path) -> FileGenerator:
 
         # Yield file
         yield ChecksummedFile(path=path, size=size, digest=digest)
-
-
-def compute_zarr_checksum(generator: FileGenerator) -> str:
-    tree = ZarrChecksumTree()
-    for file in generator:
-        tree.add_leaf(
-            path=file.path,
-            size=file.size,
-            digest=file.digest,
-        )
-
-    # Compute digest
-    return tree.process()
