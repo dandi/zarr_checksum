@@ -51,12 +51,12 @@ class ZarrChecksum(pydantic.BaseModel):
     name: str
     size: int
 
-    # To make ZarrChecksums sortable
+    # To make this class sortable
     def __lt__(self, other: ZarrChecksum):
         return self.name < other.name
 
 
-class ZarrChecksums(pydantic.BaseModel):
+class ZarrChecksumManifest(pydantic.BaseModel):
     """
     A set of file and directory checksums.
 
@@ -98,4 +98,4 @@ class ZarrChecksums(pydantic.BaseModel):
 
 
 # The "null" zarr checksum
-EMPTY_CHECKSUM = ZarrChecksums().generate_digest().digest
+EMPTY_CHECKSUM = ZarrChecksumManifest().generate_digest().digest
