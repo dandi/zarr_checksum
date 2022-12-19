@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from functools import total_ordering
 import hashlib
 import re
-from functools import total_ordering
 from typing import List
 
 import pydantic
