@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import heapq
 from pathlib import Path
 
-from zarr_checksum.models import ZarrChecksum, ZarrChecksums
+from zarr_checksum.checksum import ZarrChecksum, ZarrChecksumManifest
 
 __all__ = ["ZarrChecksumNode", "ZarrChecksumTree"]
 
@@ -15,7 +15,7 @@ class ZarrChecksumNode:
     """Represents the aggregation of zarr files at a specific path in the tree."""
 
     path: Path
-    checksums: ZarrChecksums
+    checksums: ZarrChecksumManifest
 
     def __lt__(self, other):
         return str(self.path) < str(other.path)
@@ -33,7 +33,7 @@ class ZarrChecksumTree:
         return len(self._heap) == 0
 
     def _add_path(self, key: Path):
-        node = ZarrChecksumNode(path=key, checksums=ZarrChecksums())
+        node = ZarrChecksumNode(path=key, checksums=ZarrChecksumManifest())
 
         # Add link to node
         self._path_map[key] = node
@@ -76,7 +76,7 @@ class ZarrChecksumTree:
     def process(self) -> str:
         """Process the tree, returning the resulting top level digest."""
         # Begin with empty root node, so if no files are present, the empty checksum is returned
-        node = ZarrChecksumNode(path=".", checksums=ZarrChecksums())
+        node = ZarrChecksumNode(path=".", checksums=ZarrChecksumManifest())
         while not self.empty:
             # Pop the deepest directory available
             node = self.pop_deepest()

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from functools import total_ordering
 import hashlib
 import re
-from functools import total_ordering
 from typing import List
 
 import pydantic
@@ -45,18 +45,20 @@ class ZarrChecksum(pydantic.BaseModel):
     Every file and directory in a zarr archive has a name, digest, and size.
     Leaf nodes are created by providing an md5 digest.
     Internal nodes (directories) have a digest field that is a zarr directory digest
+
+    This class is serialized to JSON, and as such, key order should not be modified.
     """
 
     digest: str
     name: str
     size: int
 
-    # To make ZarrChecksums sortable
+    # To make this class sortable
     def __lt__(self, other: ZarrChecksum):
         return self.name < other.name
 
 
-class ZarrChecksums(pydantic.BaseModel):
+class ZarrChecksumManifest(pydantic.BaseModel):
     """
     A set of file and directory checksums.
 
@@ -98,4 +100,4 @@ class ZarrChecksums(pydantic.BaseModel):
 
 
 # The "null" zarr checksum
-EMPTY_CHECKSUM = ZarrChecksums().generate_digest().digest
+EMPTY_CHECKSUM = ZarrChecksumManifest().generate_digest().digest
