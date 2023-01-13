@@ -1,0 +1,5 @@
+{
+    "plugins": [
+        ".auto/plugins/pypi-publish.ts"
+    ]
+}
