@@ -32,9 +32,9 @@ FileGenerator = Iterable[ZarrArchiveFile]
 
 
 class AWSCredentials(TypedDict):
-    key: str
-    secret: str
-    region: str
+    aws_access_key_id: str
+    aws_secret_access_key: str
+    region_name: str
 
 
 def yield_files_s3(
@@ -42,17 +42,12 @@ def yield_files_s3(
 ) -> FileGenerator:
     if credentials is None:
         credentials = {
-            "key": None,
-            "secret": None,
-            "region": "us-east-1",
+            "aws_access_key_id": None,
+            "aws_secret_access_key": None,
+            "region_name": "us-east-1",
         }
 
-    client = boto3.client(
-        "s3",
-        region_name=credentials["region"],
-        aws_access_key_id=credentials["key"],
-        aws_secret_access_key=credentials["secret"],
-    )
+    client = boto3.client("s3", **credentials)
 
     continuation_token = None
     options = {"Bucket": bucket, "Prefix": prefix}
