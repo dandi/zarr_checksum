@@ -11,15 +11,9 @@ from zarr_checksum.checksum import (
 def test_generate_digest():
     manifest = ZarrChecksumManifest(
         directories=[
-            ZarrChecksum(
-                digest="a7e86136543b019d72468ceebf71fb8e-1--1", name="a/b", size=1
-            )
+            ZarrChecksum(digest="a7e86136543b019d72468ceebf71fb8e-1--1", name="a/b", size=1)
         ],
-        files=[
-            ZarrChecksum(
-                digest="92eb5ffee6ae2fec3ad71c777531578f-1--1", name="b", size=1
-            )
-        ],
+        files=[ZarrChecksum(digest="92eb5ffee6ae2fec3ad71c777531578f-1--1", name="b", size=1)],
     )
     assert manifest.generate_digest().digest == "2ed39fd5ae56fd4177c4eb503d163528-2--2"
 

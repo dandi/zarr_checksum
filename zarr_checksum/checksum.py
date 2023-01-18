@@ -84,8 +84,7 @@ class ZarrChecksumManifest(pydantic.BaseModel):
 
         # Aggregate total file count
         count = len(self.files) + sum(
-            ZarrDirectoryDigest.parse(checksum.digest).count
-            for checksum in self.directories
+            ZarrDirectoryDigest.parse(checksum.digest).count for checksum in self.directories
         )
 
         # Aggregate total size

@@ -38,7 +38,6 @@ def test_yield_files_local(tmp_path):
 
 def test_yield_files_local_no_empty_dirs(tmp_path):
     """Ensure no empty directories are yielded."""
-
     # Create a nested file
     filename = tempfile.mkstemp(dir=tempfile.mkdtemp(dir=tmp_path))[1]
 
