@@ -20,7 +20,6 @@ def cli():
     ),
 )
 def local(directory: pathlib.Path):
-    directory = directory.absolute().resolve()
     checksum = compute_zarr_checksum(yield_files_local(directory))
     click.echo(click.style(text=f"Checksum for {directory} complete:", fg="green"))
     click.echo(f"\n{checksum}")
