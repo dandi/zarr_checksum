@@ -15,9 +15,7 @@ def cli():
 @cli.command()
 @click.argument(
     "directory",
-    type=click.Path(
-        exists=True, file_okay=False, dir_okay=True, path_type=pathlib.Path
-    ),
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=pathlib.Path),
 )
 def local(directory: pathlib.Path):
     checksum = compute_zarr_checksum(yield_files_local(directory))

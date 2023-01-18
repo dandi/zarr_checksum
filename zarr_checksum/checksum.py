@@ -10,6 +10,10 @@ import pydantic
 ZARR_DIGEST_PATTERN = "([0-9a-f]{32})-([0-9]+)--([0-9]+)"
 
 
+class InvalidZarrChecksum(Exception):
+    pass
+
+
 class ZarrDirectoryDigest(pydantic.BaseModel):
     """The data that can be serialized to / deserialized from a checksum string."""
 
@@ -24,7 +28,7 @@ class ZarrDirectoryDigest(pydantic.BaseModel):
 
         match = re.match(ZARR_DIGEST_PATTERN, checksum)
         if match is None:
-            raise Exception("Invalid zarr checksum provided.")
+            raise InvalidZarrChecksum()
 
         md5, count, size = match.groups()
         return cls(md5=md5, count=count, size=size)
@@ -80,8 +84,7 @@ class ZarrChecksumManifest(pydantic.BaseModel):
 
         # Aggregate total file count
         count = len(self.files) + sum(
-            ZarrDirectoryDigest.parse(checksum.digest).count
-            for checksum in self.directories
+            ZarrDirectoryDigest.parse(checksum.digest).count for checksum in self.directories
         )
 
         # Aggregate total size

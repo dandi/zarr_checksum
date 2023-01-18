@@ -58,9 +58,7 @@ def yield_files_s3(
     test_resp = client.list_objects_v2(Bucket=bucket, Prefix=os.path.join(prefix, ""))
     if "Contents" not in test_resp:
         print(f"Warning: No files found under prefix: {prefix}.")
-        print(
-            "Please check that you have provided the fully qualified path to the zarr root."
-        )
+        print("Please check that you have provided the fully qualified path to the zarr root.")
         yield from []
         return
 

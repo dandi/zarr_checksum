@@ -4,11 +4,7 @@ from dataclasses import dataclass
 import heapq
 from pathlib import Path
 
-from zarr_checksum.checksum import (
-    ZarrChecksum,
-    ZarrChecksumManifest,
-    ZarrDirectoryDigest,
-)
+from zarr_checksum.checksum import ZarrChecksum, ZarrChecksumManifest, ZarrDirectoryDigest
 
 __all__ = ["ZarrChecksumNode", "ZarrChecksumTree"]
 
@@ -55,9 +51,7 @@ class ZarrChecksumTree:
     def add_leaf(self, path: Path, size: int, digest: str):
         """Add a leaf file to the tree."""
         parent_node = self._get_path(path.parent)
-        parent_node.checksums.files.append(
-            ZarrChecksum(name=path.name, size=size, digest=digest)
-        )
+        parent_node.checksums.files.append(ZarrChecksum(name=path.name, size=size, digest=digest))
 
     def add_node(self, path: Path, size: int, digest: str):
         """Add an internal node to the tree."""
