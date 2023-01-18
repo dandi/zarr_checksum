@@ -4,7 +4,11 @@ from dataclasses import dataclass
 import heapq
 from pathlib import Path
 
-from zarr_checksum.checksum import ZarrChecksum, ZarrChecksumManifest
+from zarr_checksum.checksum import (
+    ZarrChecksum,
+    ZarrChecksumManifest,
+    ZarrDirectoryDigest,
+)
 
 __all__ = ["ZarrChecksumNode", "ZarrChecksumTree"]
 
@@ -73,7 +77,7 @@ class ZarrChecksumTree:
 
         return node
 
-    def process(self) -> str:
+    def process(self) -> ZarrDirectoryDigest:
         """Process the tree, returning the resulting top level digest."""
         # Begin with empty root node, so if no files are present, the empty checksum is returned
         node = ZarrChecksumNode(path=".", checksums=ZarrChecksumManifest())
@@ -94,4 +98,4 @@ class ZarrChecksumTree:
             )
 
         # Return digest
-        return node.checksums.generate_digest().digest
+        return node.checksums.generate_digest()
