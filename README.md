@@ -3,7 +3,7 @@ Algorithms for calculating a zarr checksum against local or cloud storage
 
 # Install
 ```
-pip install zarr_checksum
+pip install zarr-checksum
 ```
 
 # Usage
