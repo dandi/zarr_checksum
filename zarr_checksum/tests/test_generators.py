@@ -51,3 +51,6 @@ def test_yield_files_local_no_empty_dirs(tmp_path):
     files = list(yield_files_local(tmp_path))
     assert len(files) == 1
     assert files[0].path == Path(filename).relative_to(tmp_path)
+
+
+# TODO: Add tests for yield_files_s3

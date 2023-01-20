@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import hashlib
 import os
 from pathlib import Path
-from typing import Iterable, TypedDict
+from typing import Iterable
 
 import boto3
+from botocore.client import Config
 from tqdm import tqdm
 from zarr.storage import NestedDirectoryStore
 
@@ -31,24 +32,27 @@ class ZarrArchiveFile:
 FileGenerator = Iterable[ZarrArchiveFile]
 
 
-class AWSCredentials(TypedDict):
-    aws_access_key_id: str
-    aws_secret_access_key: str
-    region_name: str
+@dataclass
+class S3ClientOptions:
+    region_name: str = "us-east-1"
+    api_version: str | None = None
+    use_ssl: bool = True
+    verify: bool | None = None
+    endpoint_url: str | None = None
+    aws_access_key_id: str | None = None
+    aws_secret_access_key: str | None = None
+    aws_session_token: str | None = None
+    config: Config | None = None
 
 
 def yield_files_s3(
-    bucket: str, prefix: str = "", credentials: AWSCredentials | None = None
+    bucket: str, prefix: str = "", client_options: S3ClientOptions | None = None
 ) -> FileGenerator:
-    if credentials is None:
-        credentials = {
-            "aws_access_key_id": None,
-            "aws_secret_access_key": None,
-            "region_name": "us-east-1",
-        }
+    if client_options is None:
+        client_options = S3ClientOptions()
 
-    client = boto3.client("s3", **credentials)
-
+    # Construct client
+    client = boto3.client("s3", **asdict(client_options))
     continuation_token = None
     options = {"Bucket": bucket, "Prefix": prefix}
 
