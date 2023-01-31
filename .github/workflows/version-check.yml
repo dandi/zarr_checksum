@@ -1,0 +1,38 @@
+name: Check for version bump
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+jobs:
+  check:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-release') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install Curl
+        run: sudo apt install curl
+
+      - name: Get package version
+        run: echo "PACKAGE_VERSION=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
+
+      - name: Check for existing PyPI version
+        run: curl -I --silent --fail -o /dev/null https://pypi.org/project/zarr-checksum/$PACKAGE_VERSION/ && exit 1 || exit 0
+
+      - name: Error if version found
+        if: ${{ failure() }}
+        run: |
+          echo "Current package version ($PACKAGE_VERSION) already exists. Please either bump the \
+          package version, or add the \"skip-release\" label to the pull request." \
+          && exit 1
