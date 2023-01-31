@@ -108,7 +108,7 @@ def yield_files_local(directory: str | Path) -> FileGenerator:
         # Compute md5sum of file
         md5sum = hashlib.md5()
         with open(absolute_path, "rb") as f:
-            while chunk := f.read(8192):
+            for chunk in iter(lambda: f.read(8192), b""):
                 md5sum.update(chunk)
         digest = md5sum.hexdigest()
 
