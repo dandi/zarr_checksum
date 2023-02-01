@@ -45,13 +45,14 @@ lint = [
     "pep8-naming"
 ]
 dev = [
-    "flake8",
+    "boto3-stubs",
     "black",
-    "flake8-black",
     "isort",
-    "flake8-isort",
+    "flake8",
+    "flake8-black",
     "flake8-bugbear",
     "flake8-docstrings",
+    "flake8-isort",
     "flake8-quotes",
     "pep8-naming",
 ]
