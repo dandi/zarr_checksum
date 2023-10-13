@@ -14,7 +14,7 @@ To calculate the checksum for a local zarr archive
 zarrsum local <directory>
 ```
 
-To calcuate the checksum for a remote (S3) zarr archive
+To calculate the checksum for a remote (S3) zarr archive
 ```
 zarrsum remote s3://your_bucket/prefix_to_zarr
 ```
