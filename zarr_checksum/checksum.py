@@ -58,7 +58,7 @@ class ZarrChecksum(pydantic.BaseModel):
     size: int
 
     # To make this class sortable
-    def __lt__(self, other: ZarrChecksum):
+    def __lt__(self, other: ZarrChecksum) -> bool:
         return self.name < other.name
 
 
@@ -73,7 +73,7 @@ class ZarrChecksumManifest(pydantic.BaseModel):
     files: List[ZarrChecksum] = pydantic.Field(default_factory=list)
 
     @property
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return not (self.files or self.directories)
 
     def generate_digest(self) -> ZarrDirectoryDigest:

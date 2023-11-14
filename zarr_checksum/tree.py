@@ -17,7 +17,7 @@ class ZarrChecksumNode:
     path: Path
     checksums: ZarrChecksumManifest
 
-    def __lt__(self, other):
+    def __lt__(self, other: ZarrChecksumNode) -> bool:
         return str(self.path) < str(other.path)
 
 
@@ -29,10 +29,10 @@ class ZarrChecksumTree:
         self._path_map: dict[Path, ZarrChecksumNode] = {}
 
     @property
-    def empty(self):
+    def empty(self) -> bool:
         return len(self._heap) == 0
 
-    def _add_path(self, key: Path):
+    def _add_path(self, key: Path) -> None:
         node = ZarrChecksumNode(path=key, checksums=ZarrChecksumManifest())
 
         # Add link to node
@@ -42,18 +42,18 @@ class ZarrChecksumTree:
         length = len(key.parents)
         heapq.heappush(self._heap, (-1 * length, node))
 
-    def _get_path(self, key: Path):
+    def _get_path(self, key: Path) -> ZarrChecksumNode:
         if key not in self._path_map:
             self._add_path(key)
 
         return self._path_map[key]
 
-    def add_leaf(self, path: Path, size: int, digest: str):
+    def add_leaf(self, path: Path, size: int, digest: str) -> None:
         """Add a leaf file to the tree."""
         parent_node = self._get_path(path.parent)
         parent_node.checksums.files.append(ZarrChecksum(name=path.name, size=size, digest=digest))
 
-    def add_node(self, path: Path, size: int, digest: str):
+    def add_node(self, path: Path, size: int, digest: str) -> None:
         """Add an internal node to the tree."""
         parent_node = self._get_path(path.parent)
         parent_node.checksums.directories.append(
@@ -74,7 +74,7 @@ class ZarrChecksumTree:
     def process(self) -> ZarrDirectoryDigest:
         """Process the tree, returning the resulting top level digest."""
         # Begin with empty root node, so if no files are present, the empty checksum is returned
-        node = ZarrChecksumNode(path=".", checksums=ZarrChecksumManifest())
+        node = ZarrChecksumNode(path=Path("."), checksums=ZarrChecksumManifest())
         while not self.empty:
             # Pop the deepest directory available
             node = self.pop_deepest()

@@ -98,5 +98,12 @@ warn_return_any = true
 warn_unreachable = true
 plugins = ["pydantic.mypy"]
 
+[[tool.mypy.overrides]]
+module = [
+    # <https://github.com/zarr-developers/zarr-python/issues/1566>
+    "zarr.*",
+]
+ignore_missing_imports = true
+
 [tool.pydantic-mypy]
 init_forbid_extra = true

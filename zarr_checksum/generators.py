@@ -52,7 +52,7 @@ def yield_files_s3(
 
     # Construct client
     client = boto3.client("s3", **asdict(client_options))
-    continuation_token = None
+    continuation_token: str | None = None
     options = {"Bucket": bucket, "Prefix": prefix}
 
     print("Retrieving files...")

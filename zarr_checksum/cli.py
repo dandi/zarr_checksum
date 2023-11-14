@@ -8,7 +8,7 @@ from zarr_checksum.generators import yield_files_local, yield_files_s3
 
 
 @click.group()
-def cli():
+def cli() -> None:
     pass
 
 
@@ -17,7 +17,7 @@ def cli():
     "directory",
     type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=pathlib.Path),
 )
-def local(directory: pathlib.Path):
+def local(directory: pathlib.Path) -> None:
     checksum = compute_zarr_checksum(yield_files_local(directory))
     click.echo(click.style(text=f"Checksum for {directory} complete:", fg="green"))
     click.echo(f"\n{checksum}")
@@ -25,7 +25,7 @@ def local(directory: pathlib.Path):
 
 @cli.command()
 @click.argument("url")
-def remote(url: str):
+def remote(url: str) -> None:
     # Parse url
     parsed = urlparse(url)
     bucket = parsed.netloc
