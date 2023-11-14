@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zarr-checksum"
-version = "0.2.9"
+version = "0.2.10"
 description = "Checksum support for zarrs stored in various backends"
 readme="README.md"
 homepage="https://github.com/dandi/zarr_checksum"
