@@ -9,7 +9,6 @@ from typing import Iterable
 import boto3
 from botocore.client import Config
 from tqdm import tqdm
-from zarr.storage import NestedDirectoryStore
 
 
 @dataclass
@@ -94,6 +93,10 @@ def yield_files_s3(
 
 
 def yield_files_local(directory: str | Path) -> FileGenerator:
+    # Avoid importing zarr and its heavy dependencies like numpy unless
+    # necessary
+    from zarr.storage import NestedDirectoryStore
+
     root_path = Path(os.path.expandvars(directory)).expanduser()
     if not root_path.exists():
         raise Exception("Path does not exist")
