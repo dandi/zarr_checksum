@@ -6,7 +6,7 @@ readme="README.md"
 homepage="https://github.com/dandi/zarr_checksum"
 repository="https://github.com/dandi/zarr_checksum"
 authors = ["Kitware, Inc. <kitware@kitware.com>"]
-license = "Apache 2.0"
+license = "Apache-2.0"
 
 [tool.poetry.scripts]
 zarrsum = "zarr_checksum.cli:cli"
