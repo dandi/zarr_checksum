@@ -92,7 +92,7 @@ class ZarrChecksumManifest(pydantic.BaseModel):
             directory.size for directory in self.directories
         )
 
-        # Seralize json without any spacing
+        # Serialize json without any spacing
         json = self.json(separators=(",", ":"))
 
         # Generate digest
