@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import total_ordering
 import hashlib
+from json import dumps
 import re
 from typing import List
 
@@ -93,7 +94,9 @@ class ZarrChecksumManifest(pydantic.BaseModel):
         )
 
         # Serialize json without any spacing
-        json = self.json(separators=(",", ":"))
+        # Pydantic's model_dump_json() doesn't support specifying separators,
+        # so we have to serialize via the json module instead.
+        json = dumps(self.model_dump(mode="json"), separators=(",", ":"))
 
         # Generate digest
         md5 = hashlib.md5(json.encode("utf-8")).hexdigest()
