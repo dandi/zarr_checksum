@@ -33,6 +33,8 @@ jobs:
         include:
           - python-version: "3.10"
             toxenv: lint
+          - python-version: "3.10"
+            toxenv: typing
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python

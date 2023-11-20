@@ -4,7 +4,7 @@ import tempfile
 from zarr_checksum.generators import ZarrArchiveFile, yield_files_local
 
 
-def test_yield_files_local(tmp_path):
+def test_yield_files_local(tmp_path: Path) -> None:
     # Create file tree like so
     #           . (root)
     #          / \
@@ -36,7 +36,7 @@ def test_yield_files_local(tmp_path):
     )
 
 
-def test_yield_files_local_no_empty_dirs(tmp_path):
+def test_yield_files_local_no_empty_dirs(tmp_path: Path) -> None:
     """Ensure no empty directories are yielded."""
     # Create a nested file
     filename = tempfile.mkstemp(dir=tempfile.mkdtemp(dir=tmp_path))[1]
