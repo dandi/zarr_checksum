@@ -4,10 +4,11 @@ from dataclasses import asdict, dataclass
 import hashlib
 import os
 from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable
 
-import boto3
-from botocore.client import Config
+if TYPE_CHECKING:
+    from botocore.client import Config
+
 from tqdm import tqdm
 
 
@@ -47,6 +48,8 @@ class S3ClientOptions:
 def yield_files_s3(
     bucket: str, prefix: str = "", client_options: S3ClientOptions | None = None
 ) -> FileGenerator:
+    import boto3
+
     if client_options is None:
         client_options = S3ClientOptions()
 
