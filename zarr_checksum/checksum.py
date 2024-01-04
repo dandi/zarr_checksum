@@ -1,12 +1,10 @@
 from __future__ import annotations
 
+from dataclasses import asdict, dataclass, field
 from functools import total_ordering
 import hashlib
 from json import dumps
 import re
-from typing import List
-
-import pydantic
 
 ZARR_DIGEST_PATTERN = "([0-9a-f]{32})-([0-9]+)--([0-9]+)"
 
@@ -15,7 +13,8 @@ class InvalidZarrChecksum(Exception):
     pass
 
 
-class ZarrDirectoryDigest(pydantic.BaseModel):
+@dataclass
+class ZarrDirectoryDigest:
     """The data that can be serialized to / deserialized from a checksum string."""
 
     md5: str
@@ -32,7 +31,7 @@ class ZarrDirectoryDigest(pydantic.BaseModel):
             raise InvalidZarrChecksum()
 
         md5, count, size = match.groups()
-        return cls(md5=md5, count=count, size=size)
+        return cls(md5=md5, count=int(count), size=int(size))
 
     def __str__(self) -> str:
         return self.digest
@@ -43,7 +42,8 @@ class ZarrDirectoryDigest(pydantic.BaseModel):
 
 
 @total_ordering
-class ZarrChecksum(pydantic.BaseModel):
+@dataclass
+class ZarrChecksum:
     """
     A checksum for a single file/directory in a zarr file.
 
@@ -63,15 +63,16 @@ class ZarrChecksum(pydantic.BaseModel):
         return self.name < other.name
 
 
-class ZarrChecksumManifest(pydantic.BaseModel):
+@dataclass
+class ZarrChecksumManifest:
     """
     A set of file and directory checksums.
 
     This is the data hashed to calculate the checksum of a directory.
     """
 
-    directories: List[ZarrChecksum] = pydantic.Field(default_factory=list)
-    files: List[ZarrChecksum] = pydantic.Field(default_factory=list)
+    directories: list[ZarrChecksum] = field(default_factory=list)
+    files: list[ZarrChecksum] = field(default_factory=list)
 
     @property
     def is_empty(self) -> bool:
@@ -94,9 +95,7 @@ class ZarrChecksumManifest(pydantic.BaseModel):
         )
 
         # Serialize json without any spacing
-        # Pydantic's model_dump_json() doesn't support specifying separators,
-        # so we have to serialize via the json module instead.
-        json = dumps(self.model_dump(mode="json"), separators=(",", ":"))
+        json = dumps(asdict(self), separators=(",", ":"))
 
         # Generate digest
         md5 = hashlib.md5(json.encode("utf-8")).hexdigest()
