@@ -27,7 +27,7 @@ flake8-bugbear = {version = "^23.1.20", optional = true}
 flake8-docstrings = {version = "^1.7.0", optional = true}
 flake8-isort = {version = "^6.0.0", optional = true}
 flake8-quotes = {version = "^3.3.2", optional = true}
-pep8-naming = {version = "^0.13.3", optional = true}
+pep8-naming = {version = ">=0.13.3,<0.15.0", optional = true}
 pytest = {version = "^7.2.1", optional = true}
 zarr = {version = "^2.12", optional = true}
 
