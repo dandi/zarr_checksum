@@ -21,14 +21,11 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
 
-      - name: Install Curl
-        run: sudo apt install curl
-
       - name: Get package version
         run: echo "PACKAGE_VERSION=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
 
       - name: Check for existing PyPI version
-        run: curl -I --silent --fail -o /dev/null https://pypi.org/project/zarr-checksum/$PACKAGE_VERSION/ && exit 1 || exit 0
+        run: pip install --dry-run zarr-checksum==$PACKAGE_VERSION && exit 1 || exit 0
 
       - name: Error if version found
         if: ${{ failure() }}
