@@ -49,6 +49,15 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 
+# Providing these values here is deprecated, and is only duplicated here to support python versions 3.7 and 3.8
+[tool.poetry]
+package-mode = true
+authors = ["Kitware, Inc. <kitware@kitware.com>"]
+name = "zarr-checksum"
+version = "0.4.2"
+description = "Checksum support for zarrs stored in various backends"
+
+
 [tool.isort]
 profile = "black"
 line_length = 100
