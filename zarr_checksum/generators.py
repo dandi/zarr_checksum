@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import hashlib
+import logging
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
@@ -10,6 +11,8 @@ if TYPE_CHECKING:
     from botocore.client import Config
 
 from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -58,13 +61,15 @@ def yield_files_s3(
     continuation_token: str | None = None
     options = {"Bucket": bucket, "Prefix": prefix}
 
-    print("Retrieving files...")
+    logger.info("Retrieving files...")
 
     # Test that url is fully qualified path by appending slash to prefix and listing objects
     test_resp = client.list_objects_v2(Bucket=bucket, Prefix=os.path.join(prefix, ""))
     if "Contents" not in test_resp:
-        print(f"Warning: No files found under prefix: {prefix}.")
-        print("Please check that you have provided the fully qualified path to the zarr root.")
+        logger.warning("No files found under prefix: %s.", prefix)
+        logger.warning(
+            "Please check that you have provided the fully qualified path to the zarr root."
+        )
         yield from []
         return
 
@@ -104,7 +109,7 @@ def yield_files_local(directory: str | Path) -> FileGenerator:
     if not root_path.exists():
         raise Exception("Path does not exist")
 
-    print("Discovering files...")
+    logger.info("Discovering files...")
     store = NestedDirectoryStore(root_path)
     for file in tqdm(list(store.keys())):
         path = Path(file)
