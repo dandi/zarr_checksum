@@ -1,7 +1,7 @@
 [project]
 authors = [{ name = "Kitware, Inc.", email = "kitware@kitware.com" }]
 name = "zarr-checksum"
-version = "0.4.4"
+version = "0.4.5"
 description = "Checksum support for zarrs stored in various backends"
 readme = "README.md"
 license = "Apache-2.0"
@@ -35,7 +35,7 @@ build-backend = "poetry.core.masonry.api"
 package-mode = true
 authors = ["Kitware, Inc. <kitware@kitware.com>"]
 name = "zarr-checksum"
-version = "0.4.4"
+version = "0.4.5"
 description = "Checksum support for zarrs stored in various backends"
 
 
