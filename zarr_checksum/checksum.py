@@ -1,15 +1,15 @@
 from __future__ import annotations
 
+import hashlib
+import re
 from dataclasses import asdict, dataclass, field
 from functools import total_ordering
-import hashlib
 from json import dumps
-import re
 
 ZARR_DIGEST_PATTERN = "([0-9a-f]{32})-([0-9]+)--([0-9]+)"
 
 
-class InvalidZarrChecksum(Exception):
+class InvalidZarrChecksum(Exception):  # noqa: N818
     pass
 
 
@@ -28,7 +28,7 @@ class ZarrDirectoryDigest:
 
         match = re.match(ZARR_DIGEST_PATTERN, checksum)
         if match is None:
-            raise InvalidZarrChecksum()
+            raise InvalidZarrChecksum
 
         md5, count, size = match.groups()
         return cls(md5=md5, count=int(count), size=int(size))

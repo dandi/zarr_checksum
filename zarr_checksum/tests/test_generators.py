@@ -1,5 +1,5 @@
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 from zarr_checksum.generators import ZarrArchiveFile, yield_files_local
 
