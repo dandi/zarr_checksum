@@ -19,6 +19,14 @@ jobs:
         run: poetry check --lock
   test:
     runs-on: ubuntu-22.04
+    services:
+      minio:
+        image: bitnami/minio:latest
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ROOT_USER: minioAccessKey
+          MINIO_ROOT_PASSWORD: minioSecretKey
     strategy:
       fail-fast: false
       matrix:
@@ -49,3 +57,7 @@ jobs:
           pip install tox
       - name: Run tests
         run: tox -e ${{ matrix.toxenv }}
+        env:
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_ACCESS_KEY: minioAccessKey
+          MINIO_SECRET_KEY: minioSecretKey
