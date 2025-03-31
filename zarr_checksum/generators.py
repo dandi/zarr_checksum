@@ -58,8 +58,6 @@ def yield_files_s3(
 
     # Construct client
     client = boto3.client("s3", **asdict(client_options))
-    continuation_token: str | None = None
-    options = {"Bucket": bucket, "Prefix": prefix}
 
     logger.info("Retrieving files...")
 
@@ -73,14 +71,9 @@ def yield_files_s3(
         yield from []
         return
 
-    # Iterate until all files found
-    while True:
-        if continuation_token is not None:
-            options["ContinuationToken"] = continuation_token
-
-        # Fetch
-        res = client.list_objects_v2(**options)
-
+    # Fetch
+    paginator = client.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
         # Fix keys of listing to be relative to zarr root
         mapped = (
             ZarrArchiveFile(
@@ -88,16 +81,11 @@ def yield_files_s3(
                 size=obj["Size"],
                 digest=obj["ETag"].strip('"'),
             )
-            for obj in res.get("Contents", [])
+            for obj in page.get("Contents", [])
         )
 
-        # Yield as flat iteratble
+        # Yield as flat iterable
         yield from mapped
-
-        # If all files fetched, end
-        continuation_token = res.get("NextContinuationToken", None)
-        if continuation_token is None:
-            break
 
 
 def yield_files_local(directory: str | Path) -> FileGenerator:
