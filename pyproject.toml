@@ -10,7 +10,7 @@ dependencies = ["click>=8.1.3", "tqdm>=4.64.1"]
 
 [project.optional-dependencies]
 boto = ["boto3>=1.24"]
-zarr = ["zarr>=2.12"]
+zarr = ["zarr>=2.12,<3"]
 test = ["pytest>=7.2.1"]
 format = ["black>=23.3.0", "isort>=5.11.4"]
 lint = [
