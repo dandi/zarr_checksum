@@ -6,7 +6,7 @@ on:
       - master
 jobs:
   lock-file-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -18,7 +18,7 @@ jobs:
       - name: Check poetry lock file
         run: poetry check --lock
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
