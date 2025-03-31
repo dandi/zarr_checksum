@@ -1,6 +1,7 @@
 import collections
 import os
 from dataclasses import dataclass
+from typing import Generator
 
 import faker
 import pytest
@@ -17,7 +18,7 @@ class MinioSettings:
 
 
 @pytest.fixture
-def minio_settings():
+def minio_settings() -> MinioSettings:
     return MinioSettings(
         bucket_name=faker.Faker().first_name().lower(),
         endpoint=os.environ["MINIO_ENDPOINT"],
@@ -27,7 +28,7 @@ def minio_settings():
 
 
 @pytest.fixture
-def minio_client(minio_settings):
+def minio_client(minio_settings: MinioSettings) -> Generator[Minio, None, None]:
     minio = Minio(
         endpoint=os.environ["MINIO_ENDPOINT"],
         access_key=os.environ["MINIO_ACCESS_KEY"],
@@ -35,7 +36,7 @@ def minio_client(minio_settings):
         secure=False,
     )
 
-    def remove_bucket(_bucket: str):
+    def remove_bucket(_bucket: str) -> None:
         res = minio.remove_objects(
             _bucket,
             [

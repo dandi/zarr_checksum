@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 import faker
+from minio import Minio
 
 from zarr_checksum.generators import (
     S3ClientOptions,
@@ -11,9 +12,10 @@ from zarr_checksum.generators import (
     yield_files_local,
     yield_files_s3,
 )
+from zarr_checksum.tests.conftest import MinioSettings
 
 
-def test_yield_files_s3(minio_client, minio_settings):
+def test_yield_files_s3(minio_client: Minio, minio_settings: MinioSettings) -> None:
     fake = faker.Faker()
     # TODO: Replace with removeprefix once python 3.9+ becomes the minimum version
     files = [fake.file_path().lstrip("/") for _ in range(10)]
