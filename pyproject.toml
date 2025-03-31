@@ -1,12 +1,12 @@
 [project]
 authors = [{ name = "Kitware, Inc.", email = "kitware@kitware.com" }]
 name = "zarr-checksum"
-version = "0.4.5"
+version = "0.4.6"
 description = "Checksum support for zarrs stored in various backends"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.7"
-dependencies = ["click>=8.1.3", "tqdm>=4.64.1"]
+dependencies = ["click>=8.1.8", "tqdm>=4.67.1"]
 
 [project.optional-dependencies]
 boto = ["boto3>=1.24"]
@@ -35,7 +35,7 @@ build-backend = "poetry.core.masonry.api"
 package-mode = true
 authors = ["Kitware, Inc. <kitware@kitware.com>"]
 name = "zarr-checksum"
-version = "0.4.5"
+version = "0.4.6"
 description = "Checksum support for zarrs stored in various backends"
 
 
