@@ -6,7 +6,7 @@ description = "Checksum support for zarrs stored in various backends"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.7"
-dependencies = ["click>=8.1.3", "tqdm>=4.64.1"]
+dependencies = ["click>=8.1.3", "tqdm>=4.67.1"]
 
 [project.optional-dependencies]
 boto = ["boto3>=1.24"]
