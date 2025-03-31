@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import heapq
+from dataclasses import dataclass
 from pathlib import Path
 
 from zarr_checksum.checksum import ZarrChecksum, ZarrChecksumManifest, ZarrDirectoryDigest
@@ -74,13 +74,13 @@ class ZarrChecksumTree:
     def process(self) -> ZarrDirectoryDigest:
         """Process the tree, returning the resulting top level digest."""
         # Begin with empty root node, so if no files are present, the empty checksum is returned
-        node = ZarrChecksumNode(path=Path("."), checksums=ZarrChecksumManifest())
+        node = ZarrChecksumNode(path=Path(), checksums=ZarrChecksumManifest())
         while not self.empty:
             # Pop the deepest directory available
             node = self.pop_deepest()
 
             # If we have reached the root node, then we're done.
-            if node.path == Path(".") or node.path == Path("/"):
+            if node.path == Path() or node.path == Path("/"):
                 break
 
             # Add the parent of this node to the tree

@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-from zarr_checksum.checksum import ZarrDirectoryDigest
-from zarr_checksum.generators import FileGenerator
+from typing import TYPE_CHECKING
+
 from zarr_checksum.tree import ZarrChecksumTree
+
+if TYPE_CHECKING:
+    from zarr_checksum.checksum import ZarrDirectoryDigest
+    from zarr_checksum.generators import FileGenerator
 
 __all__ = [
     "compute_zarr_checksum",

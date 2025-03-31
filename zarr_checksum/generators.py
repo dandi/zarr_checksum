@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 import hashlib
 import logging
 import os
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
 
@@ -95,7 +95,7 @@ def yield_files_local(directory: str | Path) -> FileGenerator:
 
     root_path = Path(os.path.expandvars(directory)).expanduser()
     if not root_path.exists():
-        raise Exception("Path does not exist")
+        raise Exception("Path does not exist")  # noqa: TRY002
 
     logger.info("Discovering files...")
     store = NestedDirectoryStore(root_path)

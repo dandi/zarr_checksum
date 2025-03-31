@@ -1,7 +1,46 @@
-from pathlib import Path
+import io
+import os
 import tempfile
+from pathlib import Path
 
-from zarr_checksum.generators import ZarrArchiveFile, yield_files_local
+import faker
+from minio import Minio
+
+from zarr_checksum.generators import (
+    S3ClientOptions,
+    ZarrArchiveFile,
+    yield_files_local,
+    yield_files_s3,
+)
+from zarr_checksum.tests.conftest import MinioSettings
+
+
+def test_yield_files_s3(minio_client: Minio, minio_settings: MinioSettings) -> None:
+    fake = faker.Faker()
+    # TODO: Replace with removeprefix once python 3.9+ becomes the minimum version
+    files = [fake.file_path().lstrip("/") for _ in range(10)]
+    for f in files:
+        data = os.urandom(100)
+        minio_client.put_object(
+            bucket_name=minio_settings.bucket_name,
+            object_name=f,
+            data=io.BytesIO(data),
+            length=len(data),
+        )
+
+    s3_files = yield_files_s3(
+        bucket=minio_settings.bucket_name,
+        client_options=S3ClientOptions(
+            endpoint_url=f"http://{minio_settings.endpoint}",
+            aws_access_key_id=minio_settings.access_key,
+            aws_secret_access_key=minio_settings.secret_key,
+            use_ssl=False,
+        ),
+    )
+
+    s3_file_paths = [str(file.path) for file in s3_files]
+    assert len(s3_file_paths) == len(files)
+    assert set(s3_file_paths) == set(files)
 
 
 def test_yield_files_local(tmp_path: Path) -> None:
@@ -51,6 +90,3 @@ def test_yield_files_local_no_empty_dirs(tmp_path: Path) -> None:
     files = list(yield_files_local(tmp_path))
     assert len(files) == 1
     assert files[0].path == Path(filename).relative_to(tmp_path)
-
-
-# TODO: Add tests for yield_files_s3
