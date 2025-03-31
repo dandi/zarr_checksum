@@ -78,8 +78,13 @@ ignore = [
     # Try to fix upstream
     "RUF012", #  Mutable class attributes should be annotated with `typing.ClassVar`
 
-    "D203", # incorrect-blank-line-before-class
-    "D212", # multi-line-summary-first-line
+    "D203",   # incorrect-blank-line-before-class
+    "D212",   # multi-line-summary-first-line
+    "PTH118", # os-path-join
+    "PTH123", # builtin-open
+
+    # We intentionally use md5 to conform to S3
+    "S324", # hashlib-insecure-hash-function
 
 ]
 
