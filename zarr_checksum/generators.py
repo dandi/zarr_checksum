@@ -89,17 +89,17 @@ def yield_files_s3(
 
 
 def yield_files_local(directory: str | Path) -> FileGenerator:
-    # Avoid importing zarr and its heavy dependencies like numpy unless
-    # necessary
-    from zarr.storage import NestedDirectoryStore
-
     root_path = Path(os.path.expandvars(directory)).expanduser()
     if not root_path.exists():
         raise Exception("Path does not exist")  # noqa: TRY002
 
     logger.info("Discovering files...")
-    store = NestedDirectoryStore(root_path)
-    for file in tqdm(list(store.keys())):
+    files: list[str] = []
+    for strpath, _, fnames in os.walk(directory):
+        path = Path(strpath)
+        files.extend(str(path.relative_to(directory) / fname) for fname in fnames)
+
+    for file in tqdm(files):
         path = Path(file)
         absolute_path = root_path / path
         size = absolute_path.stat().st_size

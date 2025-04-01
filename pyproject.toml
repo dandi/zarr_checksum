@@ -10,7 +10,6 @@ dependencies = ["click>=8.1.8", "tqdm>=4.67.1"]
 
 [project.optional-dependencies]
 boto = ["boto3>=1.24"]
-zarr = ["zarr>=2.12,<3"]
 test = ["pytest>=7.2.1", "minio", "faker"]
 format = ["ruff>=0.11.2"]
 lint = ["ruff>=0.11.2"]
@@ -118,10 +117,3 @@ strict_equality = true
 warn_redundant_casts = true
 warn_return_any = true
 warn_unreachable = true
-
-[[tool.mypy.overrides]]
-module = [
-    # <https://github.com/zarr-developers/zarr-python/issues/1566>
-    "zarr.*",
-]
-ignore_missing_imports = true
