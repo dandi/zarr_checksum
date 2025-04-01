@@ -1,7 +1,7 @@
 [project]
 authors = [{ name = "Kitware, Inc.", email = "kitware@kitware.com" }]
 name = "zarr-checksum"
-version = "0.4.6"
+version = "0.4.7"
 description = "Checksum support for zarrs stored in various backends"
 readme = "README.md"
 license = "Apache-2.0"
@@ -10,7 +10,6 @@ dependencies = ["click>=8.1.8", "tqdm>=4.67.1"]
 
 [project.optional-dependencies]
 boto = ["boto3>=1.24"]
-zarr = ["zarr>=2.12,<3"]
 test = ["pytest>=7.2.1", "minio", "faker"]
 format = ["ruff>=0.11.2"]
 lint = ["ruff>=0.11.2"]
@@ -35,7 +34,7 @@ build-backend = "poetry.core.masonry.api"
 package-mode = true
 authors = ["Kitware, Inc. <kitware@kitware.com>"]
 name = "zarr-checksum"
-version = "0.4.6"
+version = "0.4.7"
 description = "Checksum support for zarrs stored in various backends"
 
 
@@ -118,10 +117,3 @@ strict_equality = true
 warn_redundant_casts = true
 warn_return_any = true
 warn_unreachable = true
-
-[[tool.mypy.overrides]]
-module = [
-    # <https://github.com/zarr-developers/zarr-python/issues/1566>
-    "zarr.*",
-]
-ignore_missing_imports = true
