@@ -3,12 +3,15 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
 
 if TYPE_CHECKING:
     from botocore.client import Config
+
+import concurrent.futures
 
 from tqdm import tqdm
 
@@ -88,28 +91,64 @@ def yield_files_s3(
         yield from mapped
 
 
-def yield_files_local(directory: str | Path) -> FileGenerator:
+def compute_local_zarr_archive_file(path: Path):
+    """
+    Return the `ZarrArchiveFile` from a given file path.
+
+    The `path` argument should be relative to the root of the zarr archive.
+    """
+    if not path.is_file():
+        raise Exception("ZarrArchiveFile must be computed from regular file.")  # noqa: TRY002
+
+    # Compute md5sum of file
+    md5sum = hashlib.md5()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            md5sum.update(chunk)
+    digest = md5sum.hexdigest()
+
+    size = path.stat().st_size
+    # print("------", path)
+    return ZarrArchiveFile(path=path, size=size, digest=digest)
+
+
+def yield_files_local(directory: str | Path, max_workers: int | None = None) -> FileGenerator:
+    root_path = Path(os.path.expandvars(directory)).expanduser()
+    if not root_path.exists():
+        raise Exception("Path does not exist")  # noqa: TRY002
+
+    logger.info("Discovering files...")
+    with ThreadPoolExecutor(max_workers=max_workers) as exc:
+        futures: set[Future[ZarrArchiveFile]] = set()
+        for parent, _, fnames in os.walk(root_path):
+            parent_path = Path(parent)
+            for fname in fnames:
+                file = parent_path.relative_to(root_path) / fname
+                absolute_path = root_path / file
+                futures.add(exc.submit(compute_local_zarr_archive_file, path=absolute_path))
+
+        while futures:
+            done, futures = concurrent.futures.wait(
+                futures, return_when=concurrent.futures.FIRST_COMPLETED
+            )
+
+            for future in done:
+                # print("++++++++++++++++++++++++++++++++++++=+", future.result().path)
+                yield future.result()
+
+
+def yield_files_local_sync(directory: str | Path) -> FileGenerator:
     root_path = Path(os.path.expandvars(directory)).expanduser()
     if not root_path.exists():
         raise Exception("Path does not exist")  # noqa: TRY002
 
     logger.info("Discovering files...")
     files: list[str] = []
-    for strpath, _, fnames in os.walk(directory):
-        path = Path(strpath)
-        files.extend(str(path.relative_to(directory) / fname) for fname in fnames)
+    for parent, _, fnames in os.walk(root_path):
+        parent_path = Path(parent)
+        files.extend(str(parent_path.relative_to(root_path) / fname) for fname in fnames)
 
     for file in tqdm(files):
         path = Path(file)
         absolute_path = root_path / path
-        size = absolute_path.stat().st_size
-
-        # Compute md5sum of file
-        md5sum = hashlib.md5()
-        with open(absolute_path, "rb") as f:
-            for chunk in iter(lambda: f.read(8192), b""):
-                md5sum.update(chunk)
-        digest = md5sum.hexdigest()
-
-        # Yield file
-        yield ZarrArchiveFile(path=path, size=size, digest=digest)
+        yield compute_local_zarr_archive_file(path=absolute_path)

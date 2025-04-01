@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 import click
 
 from zarr_checksum import compute_zarr_checksum
-from zarr_checksum.generators import yield_files_local, yield_files_s3
+from zarr_checksum.generators import yield_files_local, yield_files_local_sync, yield_files_s3
 
 
 @click.group()
