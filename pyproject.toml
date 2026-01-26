@@ -85,6 +85,8 @@ ignore = [
     # We intentionally use md5 to conform to S3
     "S324", # hashlib-insecure-hash-function
 
+    # boto3 is intentionally lazy-imported to keep it an optional dependency
+    "PLC0415", # import-outside-top-level
 ]
 
 [tool.ruff.lint.per-file-ignores]

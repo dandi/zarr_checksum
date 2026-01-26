@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 import faker
+import pytest
 from minio import Minio
 
 from zarr_checksum.generators import (
@@ -15,6 +16,7 @@ from zarr_checksum.generators import (
 from zarr_checksum.tests.conftest import MinioSettings
 
 
+@pytest.mark.skipif("MINIO_ENDPOINT" not in os.environ, reason="MINIO_ENDPOINT not set")
 def test_yield_files_s3(minio_client: Minio, minio_settings: MinioSettings) -> None:
     fake = faker.Faker()
     # TODO: Replace with removeprefix once python 3.9+ becomes the minimum version
