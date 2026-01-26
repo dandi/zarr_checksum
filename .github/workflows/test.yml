@@ -19,14 +19,6 @@ jobs:
         run: poetry check --lock
   test:
     runs-on: ubuntu-22.04
-    services:
-      minio:
-        image: bitnami/minio:latest
-        ports:
-          - 9000:9000
-        env:
-          MINIO_ROOT_USER: minioAccessKey
-          MINIO_ROOT_PASSWORD: minioSecretKey
     strategy:
       fail-fast: false
       matrix:
@@ -47,6 +39,20 @@ jobs:
             toxenv: codespell
     steps:
       - uses: actions/checkout@v4
+      - name: Start MinIO
+        if: matrix.toxenv == 'test'
+        run: |
+          docker run -d --name minio \
+            -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioAccessKey \
+            -e MINIO_ROOT_PASSWORD=minioSecretKey \
+            ghcr.io/coollabsio/minio:latest \
+            server /data
+          # Wait for minio to be ready
+          for i in {1..30}; do
+            curl -sf http://localhost:9000/minio/health/live && break
+            sleep 1
+          done
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

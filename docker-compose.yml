@@ -1,7 +1,8 @@
 version: "3"
 services:
   minio:
-    image: minio/minio:latest
+    # minio/minio is discontinued; coollabsio builds from official source
+    image: ghcr.io/coollabsio/minio:latest
     # When run with a TTY, minio prints credentials on startup
     tty: true
     command:
